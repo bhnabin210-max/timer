@@ -35,3 +35,4 @@ Synced sessions are stored without a user account (email hash only, as in the an
 ## If sync says "server did not return JSON"
 InfinityFree's bot protection can answer app requests with an HTML challenge page. Sessions stay safely queued.
 Fix: host `session-sync.php` (and a copy of the DB access) somewhere without that challenge, or use a paid plan.
+"# timer" 
