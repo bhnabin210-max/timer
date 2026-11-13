@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>LockIn</title>
+  <meta name="theme-color" content="#141233">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/offline.css">
+</head>
+<body class="app-page">
+
+  <!-- SCREEN 1: SETUP -->
+  <main id="screen-setup" class="screen active">
+    <div class="setup">
+      <div class="setup-head">
+        <img src="img/lockin-icon.svg" alt="" width="64" height="64">
+        <h1>Set your lock-in</h1>
+      </div>
+
+      <div id="sync-area" class="sync-area" role="status" aria-live="polite"></div>
+
+      <div class="field">
+        <span class="flabel">Session type</span>
+        <div class="pills" role="group" aria-label="Session type">
+          <button type="button" class="pill" id="mode-timer" aria-pressed="true">⏱ Timer</button>
+          <button type="button" class="pill" id="mode-goal" aria-pressed="false">🎯 Set a goal</button>
+        </div>
+        <p class="hint" id="mode-hint" style="margin-top:8px">Counts up from 0:00. Finish whenever you're done — no goal, no pressure.</p>
+
+        <div id="goal-wrap" hidden style="margin-top:12px">
+          <span class="flabel">Goal</span>
+          <div class="pills" role="group" aria-label="Session duration">
+            <button type="button" class="pill" data-min="25" aria-pressed="true">25m</button>
+            <button type="button" class="pill" data-min="50" aria-pressed="false">50m</button>
+            <button type="button" class="pill" data-min="90" aria-pressed="false">90m</button>
+          </div>
+          <div class="custom-row">
+            <label for="custom-min" style="font-size:.9rem;color:var(--muted)">Custom:</label>
+            <input type="number" id="custom-min" min="1" max="240" step="1" value="25" inputmode="numeric">
+            <span style="font-size:.9rem;color:var(--muted)">minutes (1–240)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="field-name">Name <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input type="text" id="field-name" maxlength="60" placeholder="How the wall will remember you" autocomplete="off">
+        <label class="consent" style="margin-top:10px">
+          <input type="checkbox" id="field-anon">
+          <span>Show me as anonymous on the wall &amp; leaderboard — e.g. <strong>n***n</strong>. Your streak still counts.</span>
+        </label>
+      </div>
+
+      <div class="field" id="field-email-wrap">
+        <label for="field-email">Email <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input type="email" id="field-email" maxlength="255" placeholder="you@school.edu" autocomplete="off">
+        <label class="consent" style="margin-top:10px">
+          <input type="checkbox" id="consent-email">
+          <span>I consent to storing my email to track streaks and (later) reminders.</span>
+        </label>
+        <div class="privacy-note">🔒 Privacy: we never sell data. Streaks use a SHA-256 hash of your email, computed on your phone.</div>
+      </div>
+
+      <button type="button" id="btn-start" class="btn btn-primary btn-block" style="font-size:1.15rem;padding:16px">Lock in</button>
+      <p class="hint" style="text-align:center;margin-top:14px">
+        Works offline · strike if you leave the app · hold 5 seconds to finish.
+        The timer pauses while the app is in the background. Sessions sync automatically when you're online.
+      </p>
+    </div>
+  </main>
+
+  <!-- SCREEN 2: LOCK MODE -->
+  <section id="screen-lock" class="screen" aria-label="Lock mode">
+    <div class="lock-wrap" id="lock-wrap">
+      <div class="lock-controls tl">
+        <span id="strikes-badge" class="chip">clean · 0 strikes</span>
+        <span id="paused-badge" class="chip chip-gold" style="display:none">⏸ paused — timer stopped</span>
+      </div>
+
+      <div class="lock-time font-head" id="lock-time">00:00</div>
+      <div class="lock-clock" id="lock-clock">--:--</div>
+
+      <div class="ring lock-ring">
+        <svg viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="track" cx="110" cy="110" r="96" stroke-width="10"/>
+          <circle class="bar" id="lock-ring-bar" cx="110" cy="110" r="96" stroke-width="10"/>
+        </svg>
+        <div class="ring-text"><span class="ring-time">stay locked</span></div>
+      </div>
+
+      <div class="lock-controls bl">
+        <button type="button" id="btn-pause" class="icon-btn" aria-label="Pause or resume timer" aria-pressed="false">⏸ Pause</button>
+      </div>
+      <div class="lock-controls br">
+        <button type="button" id="giveup" class="icon-btn giveup" aria-label="Give up — press and hold for five seconds">
+          <span class="fill"></span><span id="giveup-label">give up (hold 5s)</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="strike-overlay" class="strike-overlay" role="alertdialog" aria-live="assertive" aria-label="Focus lost">
+      <h2>You left. Streak broken.</h2>
+      <p><span id="strike-reason">focus was lost</span> — strike logged. Stay in the app to keep the session clean.</p>
+      <button type="button" id="btn-resume" class="btn btn-primary">I'm back — keep going</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: FINISH -->
+  <section id="screen-finish" class="screen" aria-label="Session finished">
+    <div class="finish">
+      <img src="img/lockin-icon.svg" alt="" width="72" height="72">
+      <h1 id="finish-title">Session complete</h1>
+      <p class="result-sub" id="finish-sub"></p>
+      <div class="result-chips" id="finish-chips"></div>
+      <p class="finish-praise" id="finish-praise" aria-live="polite"></p>
+      <div id="finish-sync" class="sync-area finish-sync" role="status" aria-live="polite"></div>
+      <p class="quote" id="quote" aria-live="polite"></p>
+      <div class="finish-actions">
+        <button type="button" id="btn-again" class="btn btn-violet">Go again</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app-offline.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+.sync-area{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:0 0 18px}
+.sync-area:empty{display:none}
+.sync-area .btn{padding:6px 12px;font-size:.85rem}
+.finish-sync{display:flex;justify-content:center;margin:10px 0 0}
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
