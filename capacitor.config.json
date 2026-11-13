@@ -1,0 +1,9 @@
+{
+  "appId": "com.lockin.timer",
+  "appName": "LockIn",
+  "webDir": "www",
+  "backgroundColor": "#141233",
+  "plugins": {
+    "CapacitorHttp": { "enabled": true }
+  }
+}
